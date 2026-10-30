@@ -1,3 +1,8 @@
+# ============================================================================
+# viber.py - a hand-controlled visual jam: your movements throw glowing
+# particles and shockwave rings across the screen, layered over the webcam
+# view. An instrument you play for light instead of sound.
+# ============================================================================
 import cv2
 import mediapipe as mp
 from mediapipe.tasks import python

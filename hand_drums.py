@@ -1,3 +1,9 @@
+# ============================================================================
+# hand_drums.py - air drums: drum pads are drawn on the webcam view and
+# striking down through one with your hand plays that drum sound. Built-in
+# smoothing keeps the hand tracking from jittering (LandmarkSmoother) and a
+# presence tracker only counts a hit when a hand is really there.
+# ============================================================================
 import numpy as np
 import sounddevice as sd
 import cv2

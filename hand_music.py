@@ -1,3 +1,8 @@
+# ============================================================================
+# hand_music.py - a theremin you play with your hands: hand position sets
+# the note pitch and volume of a live synthesizer (AudioSynth), with
+# floating particles that dance to the music.
+# ============================================================================
 import numpy as np
 import sounddevice as sd
 import cv2
