@@ -19,6 +19,8 @@ MODEL_PATH = "hand_landmarker.task"
 # ─────────────────────────────────────────────
 # Robust Preprocessing Pipeline
 # ─────────────────────────────────────────────
+# # CLAHE evens out lighting (bright spots and shadows) so the hand tracker
+# # still works in a dim room or against a bright window.
 class FramePreprocessor:
     """Normalize lighting using CLAHE + auto brightness to help MediaPipe in bad conditions."""
     def __init__(self):
@@ -47,6 +49,8 @@ class FramePreprocessor:
 # ─────────────────────────────────────────────
 # Temporal Landmark Smoother
 # ─────────────────────────────────────────────
+# # Averages each hand point with its previous position so the pads don't
+# # shake when your hand is actually still.
 class LandmarkSmoother:
     """Exponential moving average on landmark positions to kill jitter."""
     def __init__(self, alpha=0.6):
@@ -74,6 +78,8 @@ class LandmarkSmoother:
 # ─────────────────────────────────────────────
 # Presence Tracker (anti-flicker)
 # ─────────────────────────────────────────────
+# # Ignores one-frame tracker glitches: a hand must appear a few frames in a
+# # row to count, and linger unseen a few frames before it's declared gone.
 class PresenceTracker:
     """Requires a hand to be detected for N consecutive frames before 'confirming' it,
        and keeps it alive for N frames after it disappears to prevent flickering."""
@@ -106,6 +112,8 @@ class PresenceTracker:
 # ─────────────────────────────────────────────
 # Drum Synthesis (unchanged)
 # ─────────────────────────────────────────────
+# # A kick drum is a low 'thump': the pitch drops fast (150 -> 60 Hz) while
+# # the volume fades out. All sounds here are synthesized from pure math.
 def generate_kick():
     sr = 44100
     t = np.linspace(0, 0.4, int(sr * 0.4))
@@ -115,6 +123,8 @@ def generate_kick():
     env = np.exp(-12 * t)
     return (wave * env).astype(np.float32)
 
+# # An 808 is a long booming bass drum: slow pitch drop, grit added by
+# # distorting the wave (tanh), and a long fade.
 def generate_808():
     sr = 44100
     t = np.linspace(0, 1.5, int(sr * 1.5))
@@ -125,6 +135,7 @@ def generate_808():
     env = np.exp(-1.5 * t)
     return (wave * env).astype(np.float32)
 
+# # A snare is a short tone plus a burst of white noise - the 'snap'.
 def generate_snare():
     sr = 44100
     t = np.linspace(0, 0.35, int(sr * 0.35))
@@ -136,6 +147,7 @@ def generate_snare():
     wave = tone * 0.5 + noise * noise_env * 0.5
     return wave.astype(np.float32)
 
+# # A hi-hat is very short, sharp noise: np.diff keeps only the crackle.
 def generate_hihat():
     sr = 44100
     t = np.linspace(0, 0.1, int(sr * 0.1))
@@ -151,6 +163,9 @@ DRUMS = {
     3: {"name": "808",    "sound": generate_808(),    "color": (255, 50, 255)}
 }
 
+# # Plays sounds through the speakers: the sounddevice library calls
+# # callback() whenever it needs more audio, and we mix in whatever
+# # sounds are still ringing.
 class DrumMachine:
     def __init__(self):
         self.active_sounds = []

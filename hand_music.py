@@ -42,6 +42,8 @@ SONGS = [
     }
 ]
 
+# # A floating speck that drifts, fades and shrinks - the visual confetti
+# # that dances to the music.
 class Particle:
     def __init__(self, x, y, color):
         self.x = x
@@ -58,6 +60,8 @@ class Particle:
         self.life -= 0.05
         self.size *= 0.95
 
+# # A tiny live synthesizer: you set a target pitch and volume and it glides
+# # smoothly toward them, so notes bend instead of jumping (theremin feel).
 class AudioSynth:
     def __init__(self, sample_rate=44100):
         self.sample_rate = sample_rate
@@ -78,6 +82,10 @@ class AudioSynth:
         self.target_freq = freq
         self.target_vol = vol
 
+    # # Called by the sound card whenever it needs more audio samples. Ramps
+    # # frequency and volume toward the targets inside this chunk, keeps the
+    # # wave phase continuous between chunks (otherwise you'd hear clicks), and
+    # # mixes three sine waves (fundamental + 2 harmonics) for a warmer tone.
     def _audio_callback(self, outdata, frames, time, status):
         freqs = np.linspace(self.current_freq, self.target_freq, frames)
         vols = np.linspace(self.current_vol, self.target_vol, frames)
@@ -96,6 +104,8 @@ class AudioSynth:
         self.stream.stop()
         self.stream.close()
 
+# # OpenCV has no rounded-rectangle drawing, so this builds one from circles
+# # and plain rectangles.
 def draw_rounded_rect(img, pt1, pt2, color, thickness=cv2.FILLED, r=10):
     x1, y1 = pt1
     x2, y2 = pt2
